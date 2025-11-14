@@ -91,8 +91,8 @@ void User::listUsers(){
 }
 
 //Once user logs in, load their userdata from the file
-User loadUserFromFile(const std::filesystem::path& filepath) {
-}
+//User loadUserFromFile(const std::filesystem::path& filepath) {
+//}
 
 
 void User::createUserDirectory(){
