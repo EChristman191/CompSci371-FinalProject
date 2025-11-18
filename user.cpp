@@ -60,8 +60,8 @@ void User::setLastName(std::string& last_name){
     this->last_name = last_name;
 }
 
-void User::setBalance(double increment){
-    this->balance += increment;
+void User::setBalance(double balance){
+    this->balance = balance;
 }
 
 void User::setPassword(std::string& password){
@@ -239,3 +239,4 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
         std::cout << "Unable to open the file for writing." << std::endl;
     }
 }
+
