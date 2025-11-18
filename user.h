@@ -32,7 +32,7 @@ class User{
         double getBalance() const;
         void setFirstName(std::string& first_name);
         void setLastName(std::string& last_name);
-        void setBalance(double increment);
+        void setBalance(double balance);
         void setPassword(std::string& password);
         void setUsername(std::string& username);
 
@@ -46,5 +46,6 @@ class User{
 
         static std::filesystem::path dir_path;
 };
+
 
 #endif
