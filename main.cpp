@@ -36,7 +36,11 @@ public:
 int CreateAccount()
 {
     string fName, lName, password, confPassword, username;
+
     double balance = 0.0;
+
+    system("cls");
+
 
     cout << "Please enter First Name: ";
     cin >> fName;
@@ -55,11 +59,23 @@ int CreateAccount()
 
     while (password != confPassword)
     {
-        cout << "Your passwords do not match.\nPlease confirm your new Password: ";
+        cout << "Your passwords do not match." << endl;
+
+        cout << "Please create a Password: ";
+        cin >> password;
+
+        cout << "Please confirm your new Password: ";
         cin >> confPassword;
     }
 
+
     // TODO: Save Logic ------------------
+
+    system("cls");
+    cout << "Account created!\nWelcome to our bank " << fName << " " << lName << " (" << username << ")." << endl;
+    cout << "\n\nPress Enter to continue...";
+    cin.ignore();
+    cin.get();
 
     return 0;
 }
