@@ -1,7 +1,6 @@
 #include <iostream>
 #include <list>
 #include <windows.h>
-
 #include "Menu.h"
 #include "Account.h"
 
@@ -9,7 +8,7 @@ using namespace std;
 
 int main()
 {
-    SetConsoleOutputCP(CP_UTF8);  // so ► prints correctly
+    SetConsoleOutputCP(CP_UTF8);
 
     list<string> mainMenuOptions = { "User Login", "Create Account", "Manager Login", "Exit" };
     Menu mainMenu("Main Menu", mainMenuOptions);
