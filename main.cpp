@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
-#include <cstring>
-#include <thread>
-#include <chrono>
+#include <conio.h>
 #include <list>
 using namespace std;
 
@@ -33,9 +31,35 @@ public:
     }
 };
 
+string getPassword() {
+    std::string password;
+    char ch;
+
+    while (true) {
+        ch = _getch();  
+
+        if (ch == 13) { 
+            std::cout << std::endl;
+            break;
+        }
+        else if (ch == 8) {
+            if (!password.empty()) {
+                password.pop_back();
+                std::cout << "\b \b"; 
+            }
+        }
+        else {
+            password.push_back(ch);
+            std::cout << "*"; 
+        }
+    }
+
+    return password;
+}
+
 int CreateAccount()
 {
-    string fName, lName, password, confPassword, username;
+    string fName, lName, username;
 
     double balance = 0.0;
 
@@ -52,20 +76,20 @@ int CreateAccount()
     cin >> username;
 
     cout << "Please create a Password: ";
-    cin >> password;
+    string password =  getPassword();
 
     cout << "Please confirm your new Password: ";
-    cin >> confPassword;
+    string confPassword = getPassword();
 
     while (password != confPassword)
     {
         cout << "Your passwords do not match." << endl;
 
         cout << "Please create a Password: ";
-        cin >> password;
+        password = getPassword();
 
         cout << "Please confirm your new Password: ";
-        cin >> confPassword;
+        confPassword = getPassword();
     }
 
 
@@ -82,7 +106,7 @@ int CreateAccount()
 
 int main()
 {
-    list<string> mainMenuOptions = {"User Login", "Create Account","Manager Login", "Exit"};
+    list<string> mainMenuOptions = { "User Login", "Create Account","Manager Login", "Exit" };
     Menu mainMenu = Menu("Main Menu", mainMenuOptions);
     mainMenu.Display();
 
@@ -93,20 +117,20 @@ int main()
     {
         switch (userInput)
         {
-            case 1:
-                //User Login page
-                break;
-            case 2:
-                CreateAccount();
-                break;
-            case 3:
-                //User Login page
-                break;
-            case 4:
-                cout << "Have a nice day!" << endl;
-                break;
+        case 1:
+            //User Login page
+            break;
+        case 2:
+            CreateAccount();
+            break;
+        case 3:
+            //User Login page
+            break;
+        case 4:
+            cout << "Have a nice day!" << endl;
+            break;
         }
-        
+
         mainMenu.Display();
         cin >> userInput;
     }
