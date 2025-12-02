@@ -1,6 +1,6 @@
 #include "Menu.h"
 #include <iostream>
-#include <cstdlib> // for system("cls")
+// #include <cstdlib> // for system("cls")
 
 using namespace std;
 
@@ -15,7 +15,7 @@ Menu::~Menu() {}
 void Menu::Display()
 {
     int optionCounter = 0;
-    system("cls");
+    // system("cls");
     cout << "--------------- " << this->title << " ---------------" << endl;
     for (const string& option : this->options)
     {

@@ -1,4 +1,5 @@
 #include "user.h"
+#include<string>
 
 int User::id_count = 1000;
 std::filesystem::path User::dir_path = "Users";
@@ -44,7 +45,7 @@ int User::getUserID() const{
     return this->userid;
 }
 
-double User::getBalance() const{
+double User::getBalance() const {
     return this->balance;
 }
 
@@ -52,11 +53,15 @@ std::string User::getUsername() const{
     return this->username;
 }
 
-void User::setFirstName(std::string& first_name){
+std::string User::getAccountType() const{
+    return this->account_type;
+}
+
+void User::setFirstName(const std::string& first_name){
     this->first_name = first_name;
 }
 
-void User::setLastName(std::string& last_name){
+void User::setLastName(const std::string& last_name){
     this->last_name = last_name;
 }
 
@@ -64,12 +69,16 @@ void User::setBalance(double balance){
     this->balance = balance;
 }
 
-void User::setPassword(std::string& password){
+void User::setPassword(const std::string& password){
     this->password = password;
 }
 
-void User::setUsername(std::string& username){
+void User::setUsername(const std::string& username){
     this->username = username;
+}
+
+void User::setAccountType(const std::string& account_type){
+    this->account_type = account_type;
 }
 
 int User::numOfUsers(){
@@ -91,8 +100,33 @@ void User::listUsers(){
 }
 
 //Once user logs in, load their userdata from the file
-//User loadUserFromFile(const std::filesystem::path& filepath) {
-//}
+User* User::loadUserFromFile(const std::filesystem::path& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) return nullptr;
+
+    User* u = new User();
+    std::string line;
+
+    while (std::getline(file, line)) {//Only loads information needed by the BankAccount
+        if (line.rfind("Username: ", 0) == 0) {
+            u->setUsername(line.substr(10));
+        }else if(line.rfind("First: ", 0) == 0){
+            u->setFirstName(line.substr(7));
+        }else if(line.rfind("Last: ", 0) == 0){
+            u->setLastName(line.substr(6));
+        }else if (line.rfind("Balance: ", 0) == 0) {
+            try {
+                u->setBalance(std::stod(line.substr(9)));
+            } catch (...) {
+                u->setBalance(0);
+            }
+        }else if(line.rfind("Account Type: ", 0) == 0){
+            u->setAccountType(line.substr(14));
+        }
+    }
+
+    return u;
+}
 
 
 void User::createUserDirectory(){
@@ -112,18 +146,13 @@ void User::createUserDirectory(){
         std::cerr << "Filesystem error: " << e.what() << std::endl;
     }
 
-    //Correctly initializes the total amount of accounts created 
+    //Initializes the total amount of accounts created 
     id_count += User::numOfUsers();
 }
 
 bool User::isUsernameTaken(std::string& username){
     std::filesystem::path target = dir_path / (username + ".txt");//creating a path to the inputted username. EX: "Users\\user_001.txt"
-    for(const auto& file : std::filesystem::directory_iterator(dir_path)){//automatically converts the file type depending on the file type(s) inside the 'Users' dir
-        if(target == file.path()){
-            return true;
-        }
-    }
-    return false;
+    return std::filesystem::exists(target);
 }
 
 bool User::isValidUsername(std::string& username){
@@ -150,6 +179,7 @@ void User::checkAccountType(std::string& account_type){
         }
 
         if (account_type == "checking" || account_type == "saving") {
+            account_type[0] = std::toupper(account_type[0]);
             return;
         }
 
@@ -222,6 +252,7 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
     newUser->setPassword(password);
     newUser->setUsername(username);
     newUser->setBalance(balance);
+    newUser->setAccountType(account_type);
 
     std::ofstream outputFile(dir_path.string() + "/" + username + ".txt");//Output to 'Users/<username>.txt'
     if (outputFile.is_open()) { 
@@ -231,12 +262,12 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
         outputFile << "First: " << newUser->getFirstName() << std::endl;
         outputFile << "Last: " << newUser->getLastName() << std::endl;
         outputFile << "Balance: " << newUser->getBalance() << std::endl;
+        outputFile << "Account Type: " << newUser->getAccountType() << std::endl;
         // Close the file after writing
         outputFile.close();
-        std::cout << "--SUCCESS!-- " << username << "'s " + account_type + " has been successfully created." << std::endl;
+        std::cout << std::endl << "-- SUCCESS! -- " << username << "'s " + account_type + " account has been successfully created." << std::endl << std::endl;
     }
     else {
         std::cout << "Unable to open the file for writing." << std::endl;
     }
 }
-
