@@ -1,8 +1,11 @@
 #include "bankaccount.h"
 #include "Menu.h"
+#include "deposit.h"
+#include "withdraw.h"
 #include <windows.h>
 #include <list>
 #include <string>
+#include <limits>
 
 void BankAccount::AccountMenu(User* user){
     std::list<std::string> mainMenuOptions = { "Deposit", "Withdraw", "Account Info", "View Activity", "Log Out" };
@@ -21,11 +24,36 @@ void BankAccount::AccountMenu(User* user){
         switch (userInput)
         {
         case 1:
-            //Deposit money into the balance, then add a transactional log
+        {
+            double amount = 0.0;
+            std::cout << "How much would you like to deposit? ";
+
+            if (!(std::cin >> amount)) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid amount.\n";
+                break;
+            }
+
+            Deposit::makeDeposit(user, amount);
             break;
+        }
         case 2:
+        {
             //Remove money up until the balance = $0.00, then add a transactional log
+            double amount = 0.0;
+            std::cout << "How much would you like to withdraw? ";
+
+            if (!(std::cin >> amount)) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Invalid amount.\n";
+                break;
+            }
+
+            Withdraw::makeWithdraw(user, amount);
             break;
+        }
         case 3:
             //View Balance and Account Type
             std::cout << std::endl << "--- " << user->getFirstName() << " " << user->getLastName() << "'s Account ---" << std::endl;

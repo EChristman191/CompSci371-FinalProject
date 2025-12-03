@@ -17,7 +17,9 @@ class User{
         double balance;
         std::string username;
         std::string account_type;
+        std::string transactions;
     public:
+        void saveToFile() const;
         User();
         User(std::string& first_name, std::string& last_name, double balance);
 
@@ -30,6 +32,7 @@ class User{
         std::string getFirstName() const;
         std::string getLastName() const;
         std::string getUsername() const;
+        std::string getTransactions() const;
         double getBalance() const;
         std::string getAccountType() const;
         void setFirstName(const std::string& first_name);
@@ -38,6 +41,7 @@ class User{
         void setPassword(const std::string& password);
         void setUsername(const std::string& username);
         void setAccountType(const std::string& accountType);
+        void setTransactions(const std::string& transactions);
 
         static void createAccount(User* newUser);
         static bool isValidUsername(std::string& username);

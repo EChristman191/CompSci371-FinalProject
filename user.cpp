@@ -29,6 +29,7 @@ User::User(const User& otherUser){//Copy function, will need to prompt to get a 
     this->balance = otherUser.balance;
 }
 
+// Getters
 std::string User::getFirstName() const{
     return this->first_name;
 }
@@ -57,6 +58,11 @@ std::string User::getAccountType() const{
     return this->account_type;
 }
 
+std::string User::getTransactions() const{
+    return this->transactions;
+}
+
+// Setters 
 void User::setFirstName(const std::string& first_name){
     this->first_name = first_name;
 }
@@ -79,6 +85,10 @@ void User::setUsername(const std::string& username){
 
 void User::setAccountType(const std::string& account_type){
     this->account_type = account_type;
+}
+
+void User::setTransactions(const std::string& transactions){
+    this->transactions = transactions;
 }
 
 int User::numOfUsers(){
@@ -108,22 +118,34 @@ User* User::loadUserFromFile(const std::filesystem::path& filepath) {
     std::string line;
 
     while (std::getline(file, line)) {//Only loads information needed by the BankAccount
-        if (line.rfind("Username: ", 0) == 0) {
-            u->setUsername(line.substr(10));
-        }else if(line.rfind("First: ", 0) == 0){
-            u->setFirstName(line.substr(7));
-        }else if(line.rfind("Last: ", 0) == 0){
-            u->setLastName(line.substr(6));
-        }else if (line.rfind("Balance: ", 0) == 0) {
-            try {
-                u->setBalance(std::stod(line.substr(9)));
-            } catch (...) {
-                u->setBalance(0);
-            }
-        }else if(line.rfind("Account Type: ", 0) == 0){
-            u->setAccountType(line.substr(14));
+
+    if (line.rfind("Username: ", 0) == 0) {
+        u->setUsername(line.substr(10));
+
+    } else if (line.rfind("Password: ", 0) == 0) {
+        u->setPassword(line.substr(10));
+
+    } else if (line.rfind("First: ", 0) == 0) {
+        u->setFirstName(line.substr(7));
+
+    } else if (line.rfind("Last: ", 0) == 0) {
+        u->setLastName(line.substr(6));
+
+    } else if (line.rfind("Balance: ", 0) == 0) {
+        try {
+            u->setBalance(std::stod(line.substr(9)));
+        } catch (...) {
+            u->setBalance(0);
         }
+
+    } else if (line.rfind("Account Type: ", 0) == 0) {
+        u->setAccountType(line.substr(14));
+
+    } else if (line.rfind("Transaction History: ", 0) == 0) {
+        const std::string key = "Transaction History: ";
+        u->setTransactions(line.substr(key.length()));
     }
+}
 
     return u;
 }
@@ -253,21 +275,35 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
     newUser->setUsername(username);
     newUser->setBalance(balance);
     newUser->setAccountType(account_type);
+    newUser->setTransactions(""); // start with empty transaction history
 
-    std::ofstream outputFile(dir_path.string() + "/" + username + ".txt");//Output to 'Users/<username>.txt'
-    if (outputFile.is_open()) { 
-        outputFile << "Account#: " << newUser->getUserID() << std::endl;
-        outputFile << "Username: " << newUser->getUsername() << std::endl;
-        outputFile << "Password: " << newUser->getPassword() << std::endl;
-        outputFile << "First: " << newUser->getFirstName() << std::endl;
-        outputFile << "Last: " << newUser->getLastName() << std::endl;
-        outputFile << "Balance: " << newUser->getBalance() << std::endl;
-        outputFile << "Account Type: " << newUser->getAccountType() << std::endl;
-        // Close the file after writing
-        outputFile.close();
-        std::cout << std::endl << "-- SUCCESS! -- " << username << "'s " + account_type + " account has been successfully created." << std::endl << std::endl;
+    //Instead of manually writing the file here, use the centralized saveToFile() function
+    newUser->saveToFile();
+
+    std::cout << std::endl << "-- SUCCESS! -- " 
+              << username << "'s " + account_type 
+              << " account has been successfully created." 
+              << std::endl << std::endl;
     }
-    else {
+
+void User::saveToFile() const {
+    std::filesystem::path filepath = dir_path / (username + ".txt");
+    std::ofstream out(filepath);
+
+    // YOUR ERROR CHECK (RESTORED)
+    if (!out.is_open()) {
         std::cout << "Unable to open the file for writing." << std::endl;
+        return;
     }
+
+    out << "Account#: " << userid << std::endl;
+    out << "Username: " << username << std::endl;
+    out << "Password: " << password << std::endl;
+    out << "First: " << first_name << std::endl;
+    out << "Last: " << last_name << std::endl;
+    out << "Balance: " << balance << std::endl;
+    out << "Account Type: " << account_type << std::endl;
+    out << "Transaction History: " << transactions << std::endl;
+
+    out.close();
 }
