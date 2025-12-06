@@ -4,6 +4,7 @@
 #include "user.h"
 #include "Menu.h"
 #include "login.h"
+#include "Manager.h"
 
 /*
     You must compile the project by doing 'g++ Main.cpp user.cpp -o app' in the directory cmd
@@ -40,7 +41,8 @@ int main() {
             delete user;//Delete the user pointer as it is no longer needed for account creation. Will be reused when user logs in
             break;
         case 3:
-            // Manager Login page (TODO)
+            // Manager Login page
+            Manager::ManagerLogin();
             break;
         case 4:
             exitLoop = true;

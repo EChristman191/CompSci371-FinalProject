@@ -33,6 +33,7 @@ class User{
         std::string getLastName() const;
         std::string getUsername() const;
         std::string getTransactions() const;
+        static User* GetUser(std::string username);
         double getBalance() const;
         std::string getAccountType() const;
         void setFirstName(const std::string& first_name);
@@ -43,6 +44,8 @@ class User{
         void setAccountType(const std::string& accountType);
         void setTransactions(const std::string& transactions);
 
+        bool DeleteUser();
+
         static void createAccount(User* newUser);
         static bool isValidUsername(std::string& username);
         static bool isUsernameTaken(std::string& username);
@@ -50,7 +53,8 @@ class User{
         static void createUserDirectory();
         static User* loadUserFromFile(const std::filesystem::path& filepath);
         static void listUsers();
-        static int numOfUsers();//This is to count how many users there are in order to keep the correct number for account#
+        static int numOfUsers();
+        // This is to count how many users there are in order to keep the correct number for account#
 
         static std::filesystem::path dir_path;
 };

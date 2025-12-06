@@ -4,7 +4,8 @@
 int User::id_count = 1000;
 std::filesystem::path User::dir_path = "Users";
 
-User::User(){//Default constructor for when we do a new User()
+User::User()
+{//Default constructor for when we do a new User()
     id_count++;
     this->userid = id_count;
     this->first_name = "NULL";
@@ -91,6 +92,49 @@ void User::setTransactions(const std::string& transactions){
     this->transactions = transactions;
 }
 
+bool User::DeleteUser()
+{
+    // Build the path to this user's file: Users/<username>.txt
+    std::filesystem::path filepath = dir_path / (username + ".txt");
+
+    try
+    {
+        if (!std::filesystem::exists(filepath))
+        {
+            std::cout << "Error: No account file found for user '" 
+                      << username << "'." << std::endl;
+            return false;
+        }
+
+        // Attempt to delete the file
+        if (!std::filesystem::remove(filepath))
+        {
+            std::cout << "Error: Failed to delete account file for user '"
+                      << username << "'." << std::endl;
+            return false;
+        }
+
+        // Optional: wipe in-memory data now that the file is gone
+        first_name.clear();
+        last_name.clear();
+        password.clear();
+        username.clear();
+        transactions.clear();
+        account_type.clear();
+        balance = 0.0;
+
+        std::cout << "Account for user deleted successfully." << std::endl;
+        return true;
+    }
+    catch (const std::filesystem::filesystem_error& e)
+    {
+        std::cerr << "Filesystem error while deleting user: " 
+                  << e.what() << std::endl;
+        return false;
+    }
+}
+
+
 int User::numOfUsers(){
     int count = 0;
 
@@ -105,14 +149,61 @@ int User::numOfUsers(){
     return count;
 }
 
+User* User::GetUser(std::string username)
+{
+    return User::loadUserFromFile(User::dir_path / (username + ".txt"));
+}
+
 //Used by Managers to view all Bank Accounts
-void User::listUsers(){
+void User::listUsers()
+{
+    if (!std::filesystem::exists(dir_path)) 
+    {
+        std::cout << "No users found." << std::endl;
+        return;
+    }
+
+    std::cout << std::left
+          << std::setw(10) << "UserID"
+          << std::setw(15) << "Username"
+          << std::setw(20) << "Name"
+          << std::setw(12) << "Balance"
+          << std::setw(15) << "Account Type"
+          << std::endl;
+
+std::cout << std::string(72, '-') << std::endl;
+
+for (const auto& file : std::filesystem::directory_iterator(dir_path))
+{
+    if (file.is_regular_file())
+    {
+        User* user = loadUserFromFile(file.path());
+        if (user)
+        {
+            std::string fullName = user->getFirstName() + " " + user->getLastName();
+
+            std::cout << std::left
+                      << std::setw(10) << user->getUserID()
+                      << std::setw(15) << user->getUsername()
+                      << std::setw(20) << fullName
+                      << std::setw(12) << '$' << std::fixed << std::setprecision(2) << user->getBalance()
+                      << std::setw(15) << user->getAccountType()
+                      << std::endl;
+
+            delete user;
+        }
+    }
+}
+
 }
 
 //Once user logs in, load their userdata from the file
 User* User::loadUserFromFile(const std::filesystem::path& filepath) {
     std::ifstream file(filepath);
-    if (!file.is_open()) return nullptr;
+    // if (!file.is_open())
+    // {
+    //     std::ifstream inputFile(filepath);
+    // };
 
     User* u = new User();
     std::string line;
