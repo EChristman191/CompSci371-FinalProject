@@ -1,5 +1,6 @@
 #include "user.h"
 #include<string>
+#include<sstream>
 
 int User::id_count = 1000;
 std::filesystem::path User::dir_path = "Users";
@@ -164,38 +165,43 @@ void User::listUsers()
     }
 
     std::cout << std::left
-          << std::setw(10) << "UserID"
-          << std::setw(15) << "Username"
-          << std::setw(20) << "Name"
-          << std::setw(12) << "Balance"
-          << std::setw(15) << "Account Type"
-          << std::endl;
+              << std::setw(10) << "UserID"
+              << std::setw(15) << "Username"
+              << std::setw(20) << "Name"
+              << std::setw(12) << "Balance"
+              << std::setw(15) << "Account Type"
+              << std::endl;
 
-std::cout << std::string(72, '-') << std::endl;
+    std::cout << std::string(72, '-') << std::endl;
 
-for (const auto& file : std::filesystem::directory_iterator(dir_path))
-{
-    if (file.is_regular_file())
+    for (const auto& file : std::filesystem::directory_iterator(dir_path))
     {
-        User* user = loadUserFromFile(file.path());
-        if (user)
+        if (file.is_regular_file())
         {
-            std::string fullName = user->getFirstName() + " " + user->getLastName();
+            User* user = loadUserFromFile(file.path());
+            if (user)
+            {
+                std::string fullName = user->getFirstName() + " " + user->getLastName();
 
-            std::cout << std::left
-                      << std::setw(10) << user->getUserID()
-                      << std::setw(15) << user->getUsername()
-                      << std::setw(20) << fullName
-                      << std::setw(12) << '$' << std::fixed << std::setprecision(2) << user->getBalance()
-                      << std::setw(15) << user->getAccountType()
-                      << std::endl;
+                // format "$123.45" as a single string so setw applies to the whole thing
+                std::ostringstream balStream;
+                balStream << std::fixed << std::setprecision(2) << "$" << user->getBalance();
+                std::string balanceStr = balStream.str();
 
-            delete user;
+                std::cout << std::left
+                          << std::setw(10) << user->getUserID()
+                          << std::setw(15) << user->getUsername()
+                          << std::setw(20) << fullName
+                          << std::setw(12) << balanceStr
+                          << std::setw(15) << user->getAccountType()
+                          << std::endl;
+
+                delete user;
+            }
         }
     }
 }
 
-}
 
 //Once user logs in, load their userdata from the file
 User* User::loadUserFromFile(const std::filesystem::path& filepath) {
