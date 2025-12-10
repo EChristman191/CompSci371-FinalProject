@@ -1,13 +1,13 @@
 #include "bankaccount.h"
 #include "Menu.h"
-#include "deposit.h"
-#include "withdraw.h"
 #include <windows.h>
 #include <list>
 #include <string>
 #include <limits>
+#include <iostream>
 
-void BankAccount::AccountMenu(User* user){
+void BankAccount::AccountMenu(User* user)
+{
     std::list<std::string> mainMenuOptions = { "Deposit", "Withdraw", "Account Info", "View Activity", "Log Out" };
     Menu mainMenu("Bank Account Menu", mainMenuOptions);
     SetConsoleOutputCP(CP_UTF8);
@@ -28,43 +28,49 @@ void BankAccount::AccountMenu(User* user){
             double amount = 0.0;
             std::cout << "How much would you like to deposit? ";
 
-            if (!(std::cin >> amount)) {
+            if (!(std::cin >> amount))
+            {
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cout << "Invalid amount.\n";
                 break;
             }
 
-            Deposit::makeDeposit(user, amount);
+            // Call virtual function implemented by derived class
+            deposit(user, amount);
             break;
         }
         case 2:
         {
-            //Remove money up until the balance = $0.00, then add a transactional log
             double amount = 0.0;
             std::cout << "How much would you like to withdraw? ";
 
-            if (!(std::cin >> amount)) {
+            if (!(std::cin >> amount))
+            {
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cout << "Invalid amount.\n";
                 break;
             }
 
-            Withdraw::makeWithdraw(user, amount);
+            // Call virtual function implemented by derived class
+            withdraw(user, amount);
             break;
         }
         case 3:
-            //View Balance and Account Type
-            std::cout << std::endl << "--- " << user->getFirstName() << " " << user->getLastName() << "'s Account ---" << std::endl;
-            std::cout << "Account Type: " << user->getAccountType() << std::endl << "Balance: " << user->getBalance() << std::endl << std::endl;
+            std::cout << std::endl
+                      << "--- " << user->getFirstName() << " " << user->getLastName() << "'s Account ---" << std::endl;
+            std::cout << "Account Type: " << getAccountType() << std::endl
+                      << "Balance: " << user->getBalance() << std::endl
+                      << std::endl;
             break;
         case 4:
-            //View user Deposits and Withdrawals
+            // View user Deposits and Withdrawals (can also be virtual later if needed)
             break;
         case 5:
-            //Log the user out to the main menu
-            std::cout << std::endl << "--- Successfully Logged Out ---" << std::endl << std::endl;
+            std::cout << std::endl
+                      << "--- Successfully Logged Out ---" << std::endl
+                      << std::endl;
             exitLoop = true;
             break;
         default:
@@ -72,9 +78,9 @@ void BankAccount::AccountMenu(User* user){
             break;
         }
 
-        if(exitLoop){
+        if (exitLoop)
+        {
             break;
         }
     }
-    return;
 }
