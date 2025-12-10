@@ -88,8 +88,8 @@ void ViewAUser()
                   << std::setw(20) << fullName;
 
         // balance formatting without affecting setw
-        std::cout << std::setw(12);
-        std::cout << std::fixed << std::setprecision(2) << ("$" + std::to_string(tempUser->getBalance()));
+        std::cout << "$" << std::setw(12);
+        std::cout << std::fixed << std::setprecision(2) << tempUser->getBalance();
 
         std::cout << std::setw(15) << tempUser->getAccountType()
                   << std::endl;
