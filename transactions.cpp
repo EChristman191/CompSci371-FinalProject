@@ -140,7 +140,7 @@ namespace Transactions {
 
         // DEBUG — print raw transaction string for debugging purposes
         std::string raw = user->getTransactions();
-        std::cout << "[DEBUG] Raw transaction string: '" << raw << "'\n";
+        // std::cout << "[DEBUG] Raw transaction string: '" << raw << "'\n";
 
         auto transactions = parse(raw);
         if (transactions.empty()) {
