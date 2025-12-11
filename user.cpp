@@ -213,8 +213,16 @@ User* User::loadUserFromFile(const std::filesystem::path& filepath) {
     std::string line;
 
     while (std::getline(file, line)) {//Only loads information needed by the BankAccount
-
-        if (line.rfind("Username: ", 0) == 0) {
+        if (line.rfind("Account#: ", 0) == 0) {
+            std::string numberStr = line.substr(10);
+            try {
+                u->userid = std::stoi(numberStr);//convert to int
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error: invalid account number format: "  << numberStr << std::endl;
+            }
+        }
+        else if (line.rfind("Username: ", 0) == 0) {
             u->setUsername(line.substr(10));
 
         } else if (line.rfind("Password: ", 0) == 0) {
