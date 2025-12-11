@@ -5,27 +5,30 @@
 #include <chrono>
 #include <ctime>
 
-// Get timestamp in same format as deposit/withdraw
+// Get timestamp in same format as deposit/withdraw.
+// This ensures consistent time formatting across the system.
 static std::string getCurrentTimestamp()
 {
     using namespace std::chrono;
 
-    auto now = system_clock::now();
-    std::time_t t = system_clock::to_time_t(now);
+    auto now = system_clock::now();                  // current time
+    std::time_t t = system_clock::to_time_t(now);    // convert to time_t
 
     std::tm tm{};
-    localtime_s(&tm, &t); // Windows-safe
+    localtime_s(&tm, &t); // Windows-safe localtime conversion
 
     std::ostringstream oss;
-    oss << std::put_time(&tm, "%Y/%m/%d %H:%M:%S");
+    oss << std::put_time(&tm, "%Y/%m/%d %H:%M:%S");  // format the timestamp
     return oss.str();
 }
 
 namespace Transactions {
 
-    // Parse a single entry like:
-    //  INITIAL_DEPOSIT:300.12 TIME:2025/12/10 17:17:10 NEW_AMOUNT:300.12
-    //  DEPOSIT:421.91 TIME:2025/12/10 17:17:44 NEW_AMOUNT:722.03
+    // Parse a single transaction entry string such as:
+    //   DEPOSIT:100 TIME:2025/12/10 17:17:10 NEW_AMOUNT:200|
+    //   WITHDRAW:50 TIME:2025/12/11 12:45:01 NEW_AMOUNT:150|
+    //
+    // Converts the raw entry string into a structured Transaction object.
     static bool parseEntry(const std::string& entryStr, Transaction& out)
     {
         if (entryStr.empty())
@@ -33,13 +36,14 @@ namespace Transactions {
 
         std::string s = entryStr;
 
-        // 1. Get type token (before first ':')
+        // 1. Extract transaction type (string before first colon)
         size_t colonPos = s.find(':');
         if (colonPos == std::string::npos)
             return false;
 
         std::string typeToken = s.substr(0, colonPos);
 
+        // Map raw tokens to readable type names
         if (typeToken == "DEPOSIT") {
             out.type = "Deposit";
         } else if (typeToken == "WITHDRAW") {
@@ -47,11 +51,10 @@ namespace Transactions {
         } else if (typeToken == "INITIAL_DEPOSIT") {
             out.type = "Initial Deposit";
         } else {
-            // Unknown type
-            return false;
+            return false; // unknown transaction type
         }
 
-        // 2. Amount (after colon, up to next space)
+        // 2. Parse amount immediately after the type
         size_t amountStart = colonPos + 1;
         size_t amountEnd = s.find(' ', amountStart);
         if (amountEnd == std::string::npos)
@@ -59,39 +62,36 @@ namespace Transactions {
 
         std::string amountStr = s.substr(amountStart, amountEnd - amountStart);
         try {
-            out.amount = std::stod(amountStr);
+            out.amount = std::stod(amountStr); // convert amount string to double
         } catch (...) {
             return false;
         }
 
-        // 3. TIME:...
+        // 3. Locate the TIME: field
         const std::string timeKey = "TIME:";
         size_t timePos = s.find(timeKey, amountEnd);
         if (timePos == std::string::npos)
             return false;
 
-        size_t timeStart = timePos + timeKey.size(); // after "TIME:"
-        // Skip possible space
+        size_t timeStart = timePos + timeKey.size();
         if (timeStart < s.size() && s[timeStart] == ' ')
-            ++timeStart;
+            ++timeStart; // skip space if present
 
-        // 4. NEW_AMOUNT:...
+        // 4. Locate NEW_AMOUNT: which appears after the time
         const std::string newKey = "NEW_AMOUNT:";
         size_t newPos = s.find(newKey, timeStart);
         if (newPos == std::string::npos)
             return false;
 
-        // Time string is from timeStart up to the char before "NEW_AMOUNT:"
+        // Extract substring containing timestamp
         size_t timeEnd = newPos;
-        // trim trailing space before NEW_AMOUNT:
         while (timeEnd > timeStart && s[timeEnd - 1] == ' ')
-            --timeEnd;
+            --timeEnd; // trim trailing spaces
 
         out.time = s.substr(timeStart, timeEnd - timeStart);
 
-        // 5. Balance after (NEW_AMOUNT)
+        // 5. Parse the NEW_AMOUNT field (updated account balance)
         size_t newAmountStart = newPos + newKey.size();
-        // Skip possible space after NEW_AMOUNT:
         if (newAmountStart < s.size() && s[newAmountStart] == ' ')
             ++newAmountStart;
 
@@ -102,9 +102,10 @@ namespace Transactions {
             return false;
         }
 
-        return true;
+        return true; // successful parse
     }
 
+    // Split the full history string on '|' and parse each entry.
     std::vector<Transaction> parse(const std::string& history)
     {
         std::vector<Transaction> result;
@@ -114,17 +115,16 @@ namespace Transactions {
         std::stringstream ss(history);
         std::string entry;
 
-        // Entries separated by '|'
+        // Each entry ends with '|'
         while (std::getline(ss, entry, '|')) {
             if (entry.empty())
                 continue;
 
             Transaction tx;
             if (parseEntry(entry, tx)) {
-                result.push_back(tx);
+                result.push_back(tx); // append valid transaction
             } else {
-                // If one entry fails, we just skip it.
-                // You can std::cerr here if you want.
+                // Invalid entries are skipped silently
             }
         }
 
@@ -138,7 +138,7 @@ namespace Transactions {
             return;
         }
 
-        // DEBUG: show raw string so you can see exactly what we're parsing
+        // DEBUG — print raw transaction string for debugging purposes
         std::string raw = user->getTransactions();
         std::cout << "[DEBUG] Raw transaction string: '" << raw << "'\n";
 
@@ -152,6 +152,7 @@ namespace Transactions {
                   << user->getFirstName() << " " << user->getLastName()
                   << " (" << user->getUsername() << ") ---\n\n";
 
+        // Print table header
         std::cout << std::left
                   << std::setw(18) << "Type"
                   << std::setw(20) << "Amount"
@@ -161,6 +162,7 @@ namespace Transactions {
 
         std::cout << std::string(75, '-') << "\n";
 
+        // Print each parsed transaction entry
         for (const auto& tx : transactions) {
             std::ostringstream amt;
             amt << std::fixed << std::setprecision(2) << "$" << tx.amount;
@@ -179,6 +181,7 @@ namespace Transactions {
         std::cout << "\n";
     }
 
+    // Adds the initial deposit entry when a new account is created.
     void addInitialDeposit(User* user, double amount)
     {
         if (!user || amount <= 0.0)
@@ -193,7 +196,7 @@ namespace Transactions {
 
         std::string history = user->getTransactions();
         history += entry.str();
-        user->setTransactions(history);
+        user->setTransactions(history); // store updated history
     }
 
 } // namespace Transactions
