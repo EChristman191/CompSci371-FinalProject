@@ -8,7 +8,6 @@ std::filesystem::path User::dir_path = "Users";
 
 User::User()
 {//Default constructor for when we do a new User()
-    id_count++;
     this->userid = id_count;
     this->first_name = "NULL";
     this->last_name = "NULL";
