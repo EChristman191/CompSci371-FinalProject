@@ -1,0 +1,8 @@
+Account#: 1002
+Username: desidj27
+Password: taco
+First: David
+Last: Desing
+Balance: 722.03
+Account Type: Checking
+Transaction History: INITIAL_DEPOSIT:300.12 TIME:2025/12/10 17:17:10 NEW_AMOUNT:300.12|DEPOSIT:421.91 TIME:2025/12/10 17:17:44 NEW_AMOUNT:722.03|

@@ -1,13 +1,13 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <iomanip>
+#include <filesystem>
 #include <windows.h>
 #include "user.h"
 #include "Menu.h"
 #include "Manager.h"
-/*
-    You must compile the project by doing 'g++ Manager.cpp user.cpp -o managerApp' in the directory cmd
-*/
+#include "transactions.h"
 
 namespace Manager {
 
@@ -41,7 +41,6 @@ void DeleteUser()
 
     if (user) 
     {
-
         if (user->DeleteUser()) 
         {
             std::cout << "User '" << username << "' deleted successfully." << std::endl;
@@ -52,7 +51,6 @@ void DeleteUser()
         }
 
         delete user;
-    
     } 
     else 
     {
@@ -101,8 +99,29 @@ void ViewAUser()
         std::cout << "User '" << username << "' not found.\n";
         std::cout << "Returning to manager menu...\n";
     }
+}
 
-    return;
+// NEW: View a user's transaction history
+void ViewUserHistory()
+{
+    std::string username;
+    std::cout << "Enter the username of the user to view transaction history: ";
+    std::cin >> username;
+
+    User* tempUser = User::GetUser(username);
+
+    if (tempUser)
+    {
+        // Use the Transactions module to print the history
+        Transactions::print(tempUser);
+
+        delete tempUser;
+    }
+    else
+    {
+        std::cout << "User '" << username << "' not found.\n";
+        std::cout << "Returning to manager menu...\n";
+    }
 }
 
 void DeleteAllUsers()
@@ -128,11 +147,11 @@ void DeleteAllUsers()
     }
 }
 
-
 void managerMenu() {
     std::list<std::string> managerMenuOptions = { 
         "View All Users",
-        "View A User", 
+        "View A User",
+        "View A User's Transaction History",  // NEW OPTION
         "Delete A User",
         "Delete All Users", 
         "Logout"
@@ -157,12 +176,15 @@ void managerMenu() {
             ViewAUser();
             break;
         case 3:
-            DeleteUser();
+            ViewUserHistory();   // NEW CASE
             break;
         case 4:
-            DeleteAllUsers();
+            DeleteUser();
             break;
         case 5:
+            DeleteAllUsers();
+            break;
+        case 6:
             exitLoop = true;
             break;
         default:
@@ -170,7 +192,7 @@ void managerMenu() {
             break;
         }
 
-        if(exitLoop){
+        if (exitLoop) {
             break;
         }
     }

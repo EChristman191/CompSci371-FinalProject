@@ -1,4 +1,5 @@
 #include "user.h"
+#include "transactions.h"
 #include<string>
 #include<sstream>
 
@@ -374,8 +375,12 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
     newUser->setAccountType(account_type);
     newUser->setTransactions(""); // start with empty transaction history
 
-    //Instead of manually writing the file here, use the centralized saveToFile() function
+    // Log the initial deposit into transaction history
+    Transactions::addInitialDeposit(newUser, balance);
+
+    // Write everything (including transaction history) to file
     newUser->saveToFile();
+
 
     std::cout << std::endl << "-- SUCCESS! -- " 
               << username << "'s " + account_type 

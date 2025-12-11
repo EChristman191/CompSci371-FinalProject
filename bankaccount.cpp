@@ -1,5 +1,6 @@
 #include "bankaccount.h"
 #include "Menu.h"
+#include "transactions.h"
 #include <windows.h>
 #include <list>
 #include <string>
@@ -65,7 +66,7 @@ void BankAccount::AccountMenu(User* user)
                       << std::endl;
             break;
         case 4:
-            // View user Deposits and Withdrawals (can also be virtual later if needed)
+            Transactions::print(user);
             break;
         case 5:
             std::cout << std::endl
