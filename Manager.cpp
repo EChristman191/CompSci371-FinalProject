@@ -20,12 +20,40 @@ void ManagerLogin() {
     std::cout << "Enter Manager Password: ";
     std::cin >> managerPassword;
 
-    // For simplicity, hardcoding manager credentials
-    if (managerUsername == "admin" && managerPassword == "password") {
-        std::cout << "Manager login successful!" << std::endl;
-        managerMenu();
+    std::string line, nextLine;
+    std::ifstream inputFile("Managers/managers.txt");
+
+    if (inputFile.is_open()) {
+        while (std::getline(inputFile, line)) {
+        // Check if this line starts with "Username: "
+            if (line.rfind("Username: ", 0) == 0) {
+                // Compare username after the prefix
+                    if (line.substr(10) == managerUsername) {
+
+                    // Read the next line, "Password: "
+                    if (std::getline(inputFile, nextLine)) {
+
+                    // Check if next line starts with "Password: "
+                            if (nextLine.rfind("Password: ", 0) == 0) {
+                            // Compare password after the prefix
+                            if (nextLine.substr(10) == managerPassword) {
+                                std::cout << "\n--- Successfully Logged In ---\n\n";
+                                managerMenu();
+                                break; // stop searching after successful login
+                            } else {
+                                std::cout << "Error! Passwords do not match!" << std::endl;
+                            }
+                        }
+                    }
+                }else{
+                    std::cout << "Error! Account does not exist!" << std::endl;
+                }
+            }
+        }
+        inputFile.close();
     } else {
-        std::cout << "Invalid manager credentials!" << std::endl;
+        std::cout << "ERROR! Unable to open file" << std::endl;
+        return;
     }
 }
 
@@ -58,6 +86,13 @@ void DeleteUser()
     }
 }
 
+
+/*      EXAMPLE OF 'ViewAUser()'
+
+UserID    Username       Name                Balance     Account Type   
+------------------------------------------------------------------------
+1007      desidj27       David Desing        $52.32       Checking
+*/
 void ViewAUser()
 {
     std::string username;
@@ -85,7 +120,6 @@ void ViewAUser()
                   << std::setw(15) << tempUser->getUsername()
                   << std::setw(20) << fullName;
 
-        // balance formatting without affecting setw
         std::cout << "$" << std::setw(12);
         std::cout << std::fixed << std::setprecision(2) << tempUser->getBalance();
 
@@ -101,7 +135,16 @@ void ViewAUser()
     }
 }
 
-// NEW: View a user's transaction history
+/*      Example of 'ViewUserHistory()'
+
+--- Transaction History for Jack London (londj) ---
+
+Type              Amount              Time                  Balance After
+---------------------------------------------------------------------------
+Initial Deposit   $96.32              2025/12/10 20:55:46   $96.32
+Deposit           $23.12              2025/12/10 21:10:15   $119.44
+Withdraw          $6.70               2025/12/10 21:10:20   $112.74
+*/
 void ViewUserHistory()
 {
     std::string username;
@@ -112,8 +155,7 @@ void ViewUserHistory()
 
     if (tempUser)
     {
-        // Use the Transactions module to print the history
-        Transactions::print(tempUser);
+        Transactions::print(tempUser);//prints from Transactions
 
         delete tempUser;
     }
@@ -176,7 +218,7 @@ void managerMenu() {
             ViewAUser();
             break;
         case 3:
-            ViewUserHistory();   // NEW CASE
+            ViewUserHistory();
             break;
         case 4:
             DeleteUser();
