@@ -101,7 +101,7 @@ bool User::DeleteUser()
 
     try
     {
-        if (!std::filesystem::exists(filepath))
+        if (!std::filesystem::exists(filepath))//Check if file exists in the directory
         {
             std::cout << "Error: No account file found for user '" 
                       << username << "'." << std::endl;
@@ -115,15 +115,6 @@ bool User::DeleteUser()
                       << username << "'." << std::endl;
             return false;
         }
-
-        // Optional: wipe in-memory data now that the file is gone
-        first_name.clear();
-        last_name.clear();
-        password.clear();
-        username.clear();
-        transactions.clear();
-        account_type.clear();
-        balance = 0.0;
 
         std::cout << "Account for user deleted successfully." << std::endl;
         return true;
@@ -157,6 +148,16 @@ User* User::GetUser(std::string username)
 }
 
 //Used by Managers to view all Bank Accounts
+
+/*      Example of 'listUsers()'
+
+UserID    Username       Name                Balance     Account Type   
+------------------------------------------------------------------------
+1011      chrie30        Ethan Christman     $85.38      Saving
+1012      desidj27       David Desing        $52.32      Checking
+1013      londj          Jack London         $112.74     Saving
+
+*/
 void User::listUsers()
 {
     if (!std::filesystem::exists(dir_path)) 
@@ -207,43 +208,39 @@ void User::listUsers()
 //Once user logs in, load their userdata from the file
 User* User::loadUserFromFile(const std::filesystem::path& filepath) {
     std::ifstream file(filepath);
-    // if (!file.is_open())
-    // {
-    //     std::ifstream inputFile(filepath);
-    // };
 
     User* u = new User();
     std::string line;
 
     while (std::getline(file, line)) {//Only loads information needed by the BankAccount
 
-    if (line.rfind("Username: ", 0) == 0) {
-        u->setUsername(line.substr(10));
+        if (line.rfind("Username: ", 0) == 0) {
+            u->setUsername(line.substr(10));
 
-    } else if (line.rfind("Password: ", 0) == 0) {
-        u->setPassword(line.substr(10));
+        } else if (line.rfind("Password: ", 0) == 0) {
+            u->setPassword(line.substr(10));
 
-    } else if (line.rfind("First: ", 0) == 0) {
-        u->setFirstName(line.substr(7));
+        } else if (line.rfind("First: ", 0) == 0) {
+            u->setFirstName(line.substr(7));
 
-    } else if (line.rfind("Last: ", 0) == 0) {
-        u->setLastName(line.substr(6));
+        } else if (line.rfind("Last: ", 0) == 0) {
+            u->setLastName(line.substr(6));
 
-    } else if (line.rfind("Balance: ", 0) == 0) {
-        try {
-            u->setBalance(std::stod(line.substr(9)));
-        } catch (...) {
-            u->setBalance(0);
+        } else if (line.rfind("Balance: ", 0) == 0) {
+            try {
+                u->setBalance(std::stod(line.substr(9)));
+            } catch (...) {
+                u->setBalance(0);
+            }
+
+        } else if (line.rfind("Account Type: ", 0) == 0) {
+            u->setAccountType(line.substr(14));
+
+        } else if (line.rfind("Transaction History: ", 0) == 0) {
+            const std::string key = "Transaction History: ";
+            u->setTransactions(line.substr(key.length()));
         }
-
-    } else if (line.rfind("Account Type: ", 0) == 0) {
-        u->setAccountType(line.substr(14));
-
-    } else if (line.rfind("Transaction History: ", 0) == 0) {
-        const std::string key = "Transaction History: ";
-        u->setTransactions(line.substr(key.length()));
     }
-}
 
     return u;
 }
@@ -299,7 +296,7 @@ void User::checkAccountType(std::string& account_type){
         }
 
         if (account_type == "checking" || account_type == "saving") {
-            account_type[0] = std::toupper(account_type[0]);
+            account_type[0] = std::toupper(account_type[0]);//Changed the first character of the string to an uppercase
             return;
         }
 
@@ -307,7 +304,7 @@ void User::checkAccountType(std::string& account_type){
         std::cout << "Enter account type: ";
         std::cin >> account_type;
 
-        transform(account_type.begin(), account_type.end(), account_type.begin(), ::tolower);
+        transform(account_type.begin(), account_type.end(), account_type.begin(), ::tolower);//coverts inputted string to all lowercase
     }
 }
 
@@ -329,7 +326,7 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
         transform(username.begin(), username.end(), username.begin(), ::tolower);
     }
 
-    std::cout << "Please create a password:" << std::endl;//There are no password requirements as of right now. We can add some before submission
+    std::cout << "Please create a password:" << std::endl;//There are no password requirements as of right now.
     std::cin >> password;
 
     std::cout << "What type of account are you creating? <Checking / Saving>" << std::endl;
@@ -348,7 +345,7 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
     //Most banks require a minimum deposite. The one I use has a min of $20
     while (std::cin.fail() || balance < 20) {//Check to see if a number was inputted, if not it's a fail()
         if (std::cin.fail()) {
-            std::cin.clear(); //Clears the fail so
+            std::cin.clear(); //Clears the fail
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');//ignores the next line
             std::cout << "Error! Deposit must be a number." << std::endl;
         }
@@ -373,7 +370,6 @@ void User::createAccount(User* newUser){//User account creation. "Returns" the p
     newUser->setUsername(username);
     newUser->setBalance(balance);
     newUser->setAccountType(account_type);
-    newUser->setTransactions(""); // start with empty transaction history
 
     // Log the initial deposit into transaction history
     Transactions::addInitialDeposit(newUser, balance);
