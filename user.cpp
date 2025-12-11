@@ -7,14 +7,16 @@ int User::id_count = 1000;
 std::filesystem::path User::dir_path = "Users";
 
 User::User()
-{//Default constructor for when we do a new User()
-    this->userid = id_count;
+{//Default constructor for when we do a new User(), used for PlaceHolder user IDs
+    this->userid = -1;
     this->first_name = "NULL";
     this->last_name = "NULL";
     this->balance = 0;
 }
 
 //Can be used by managers to create a new account by entering all information right away, will still need to run a few setters
+
+//NOT IMPLEMENTED YET
 User::User(std::string& first_name, std::string& last_name, double balance){
     id_count++;
     this->userid = id_count;
