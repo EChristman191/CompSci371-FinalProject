@@ -1,58 +1,58 @@
-// #include <iostream>
+#include <iostream>
 #include <list>
+#include <limits>
 #include <windows.h>
 #include "user.h"
 #include "Menu.h"
 #include "login.h"
 #include "Manager.h"
 
-/*
-    You must compile the project by doing 'g++ Main.cpp user.cpp -o app' in the directory cmd
-*/
-
 int main() {
     std::list<std::string> mainMenuOptions = { "User Login", "Create Account", "Manager Login", "Exit" };
     Menu mainMenu("Main Menu", mainMenuOptions);
     SetConsoleOutputCP(CP_UTF8);
 
-    //VERY first thing that needs to be done. It creates the Directory for Users and managers, then the txt file for Managers. 
     User::createUserDirectory();
-    User* user;
+    User* user = nullptr;
 
     int userInput = 0;
     bool exitLoop = false;
-    while (true)
-    {
+
+    while (true) {
         mainMenu.Display();
 
         std::cout << u8"► ";
-        std::cin >> userInput;
 
-        switch (userInput)
-        {
+        if (!(std::cin >> userInput)) {
+            // Input was not an integer
+            std::cin.clear(); // clear error flags
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard bad input
+            std::cout << "Invalid input. Please enter a number from the menu.\n";
+            continue;
+        }
+
+        switch (userInput) {
         case 1:
-            // User Login page (TODO)
             UserLogin::login(user);
             break;
         case 2:
-            //For user creation, use following format
             user = new User();
             User::createAccount(user);
-            delete user;//Delete the user pointer as it is no longer needed for account creation. Will be reused when user logs in
+            delete user;
+            user = nullptr;
             break;
         case 3:
-            // Manager Login page
             Manager::ManagerLogin();
             break;
         case 4:
             exitLoop = true;
             break;
         default:
-            // Invalid option
+            std::cout << "Invalid option. Please choose 1–4.\n";
             break;
         }
 
-        if(exitLoop){
+        if (exitLoop) {
             break;
         }
     }
